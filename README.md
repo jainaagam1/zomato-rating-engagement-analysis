@@ -18,10 +18,9 @@
 6. [KPIs and Metrics](#kpis-and-metrics)
 7. [Approach](#approach)
 8. [Tools and Requirements](#tools-and-requirements)
-9. [Repository Structure](#repository-structure)
-10. [How to Run](#how-to-run)
-11. [Limitations](#limitations)
-12. [Author](#author)
+9. [Conclusions](#conclusions)
+10. [Limitations](#limitations)
+11. [Author](#author)
 
 ---
 
