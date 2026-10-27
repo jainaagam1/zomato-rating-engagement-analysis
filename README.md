@@ -142,24 +142,6 @@ Spearman correlation is **0.68**, the strongest relationship in the data. Votes 
 pip install -r requirements.txt
 ```
 
----
-
-## Repository Structure
-
-```
-zomato-rating-engagement-analysis/
-├── README.md
-├── requirements.txt
-├── .gitignore
-├── data/
-│   └── Zomato_Restaurant_Dataset.xlsx
-├── notebooks/
-│   └── zomato_analysis.ipynb
-├── sql/
-│   └── *.sql
-└── images/
-    └── *.png
-```
 
 ---
 
