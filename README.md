@@ -163,25 +163,14 @@ zomato-rating-engagement-analysis/
 
 ---
 
-## How to Run
+## Conclusions
 
-```bash
-# 1. Clone the repository
-git clone https://github.com/<your-username>/zomato-rating-engagement-analysis.git
-cd zomato-rating-engagement-analysis
+1. Table booking and delivery look related to ratings and votes overall, but the booking-rating link disappears once price range is controlled for.
+2. Higher price range is moderately associated with higher ratings.
+3. Higher-rated restaurants get many more votes, and a small group of restaurants dominates total votes.
+4. Hidden gems exist across cities, concentrated in the largest ones.
 
-# 2. (Optional) create a virtual environment
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
 
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Launch the notebook
-jupyter notebook notebooks/zomato_analysis.ipynb
-```
-
-You can also open the notebook in Google Colab and upload `data/Zomato_Restaurant_Dataset.xlsx` to run it in the browser.
 
 ---
 
