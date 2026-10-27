@@ -91,8 +91,8 @@ Spearman correlation is **0.68**, the strongest relationship in the data. Votes 
 | Votes | Number of customer votes |
 | Price range | Price tier from 1 (lowest) to 4 (highest) |
 | Average cost | Approximate cost, in local currency |
-| Table booking | Whether table booking is available |
-| Online delivery | Whether online delivery is available |
+| Has table booking | Whether table booking is available |
+| Has online delivery | Whether online delivery is available |
 | Currency | Local currency of the cost column |
 
 ---
