@@ -198,4 +198,4 @@ You can also open the notebook in Google Colab and upload `data/Zomato_Restauran
 **Aagam Jain**
 
 
-[LinkedIn](https://www.linkedin.com/in/aagamjain23164071/) · [GitHub](#) · [Email](#)
+[LinkedIn](https://www.linkedin.com/in/aagamjain23164071/) · [GitHub](https://github.com/jainaagam1) · [Email](jainaagam777@gmail.com)
