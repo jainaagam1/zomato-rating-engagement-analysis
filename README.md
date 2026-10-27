@@ -2,9 +2,10 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![SQLite](https://img.shields.io/badge/SQL-SQLite-lightgrey)
-![Status](https://img.shields.io/badge/Status-In%20Progress-orange)
 
-> Python + SQLite analysis of what drives Zomato restaurant ratings and votes: table booking, online delivery, price tier, vote outliers and hidden gems.
+> Python + SQLite analysis of what drives Zomato restaurant ratings and votes: table booking, online delivery, price range, vote outliers and hidden gems.
+
+**TL;DR:** Table booking looks like it boosts ratings (3.59 vs 3.41), but it's a price-range effect. Within the same price range, booking restaurants actually rate lower. Delivery has almost no effect on ratings. Price range and votes are the real signals.
 
 ---
 
@@ -13,19 +14,20 @@
 2. [Key Findings](#key-findings)
 3. [Recommendations](#recommendations)
 4. [About the Dataset](#about-the-dataset)
-5. [KPIs and Metrics](#kpis-and-metrics)
-6. [Approach](#approach)
-7. [Tools and Requirements](#tools-and-requirements)
-8. [Repository Structure](#repository-structure)
-9. [How to Run](#how-to-run)
-10. [Limitations](#limitations)
-11. [Author](#author)
+5. [Data Cleaning](#data-cleaning)
+6. [KPIs and Metrics](#kpis-and-metrics)
+7. [Approach](#approach)
+8. [Tools and Requirements](#tools-and-requirements)
+9. [Repository Structure](#repository-structure)
+10. [How to Run](#how-to-run)
+11. [Limitations](#limitations)
+12. [Author](#author)
 
 ---
 
 ## Business Question
 
-Which restaurant attributes (table booking, online delivery, price tier) are associated with higher ratings and more customer votes, and which highly rated restaurants are still under-discovered?
+Which restaurant attributes (table booking, online delivery, price range) are associated with higher ratings and more customer votes, and which highly rated restaurants are still under-discovered?
 
 This matters to two audiences:
 - **Restaurant owners:** which service features and pricing choices go with better customer perception.
@@ -35,29 +37,34 @@ This matters to two audiences:
 
 ## Key Findings
 
-> ⚠️ Replace every `X` and `[...]` below with the real numbers from your notebook and SQL queries. Delete this note when done.
+**Scope:** 9,550 restaurants in the dataset. 2,148 were unrated (rating = 0) and excluded, leaving **7,402** for analysis.
 
-1. **Table booking and ratings.** Restaurants offering table booking have **X% higher** average ratings than those without ([X.X vs X.X]), but [add caveat, e.g. the gap shrinks within the same price tier].
+### 1. Table booking looks beneficial, but isn't
+Restaurants with booking average **3.59 vs 3.41** without, and get about 3x the median votes (**165 vs 49**). But booking is concentrated in expensive restaurants (about 45% of price ranges 3 and 4, almost none in range 1). Within the same price range, booking restaurants rate **lower**: 3.62 vs 3.91 in range 3, and 3.70 vs 4.05 in range 4. After controlling for price range, booking is associated with about **-0.21 rating points**.
 
-   ![Rating by table booking](images/rating_by_booking.png)
+![Rating by table booking](images/rating_by_booking.png)
 
-2. **Price tier and votes.** Votes are driven mostly by **[price tier / cost]**, while ratings show a **[weak / moderate / strong]** relationship with cost (Spearman ρ = X.XX).
+### 2. Online delivery has essentially no effect on ratings
+Delivery restaurants average **3.38 vs 3.47** without. After controlling for price range, the gap shrinks to about **-0.04 points**, and the correlation is near zero. Delivery does go with somewhat higher vote counts (median **84 vs 47**).
 
-   ![Rating vs price](images/price_vs_rating.png)
+### 3. Higher price range goes with higher ratings, with diminishing returns
+Average rating rises from **3.24** (range 1) to **3.38**, **3.78** and **3.89** (range 4). Spearman correlation is **0.40**. For India alone, cost vs rating gives Spearman **0.33**. The jump from range 3 to 4 is only about 0.1.
 
-3. **Online delivery.** Restaurants with online delivery have **[higher / lower / similar]** average ratings (X.X vs X.X) and **X% [more / fewer]** votes on average.
+![Rating by price range](images/price_vs_rating.png)
 
-4. **Hidden gems.** **N restaurants** have a rating of **≥ X.X** but fewer than **Y votes**, concentrated in **[cuisine / city / price tier]**.
+### 4. Votes and ratings are strongly linked
+Spearman correlation is **0.68**, the strongest relationship in the data. Votes are heavily skewed: median **60**, mean **202**, with **838** restaurants above the outlier fence of 424 votes. Ratings from very few voters are also less reliable.
 
-5. **Vote outliers.** A small share of restaurants (**X%**) accounts for **Y%** of all votes, which makes averages misleading, so medians are reported alongside means.
+### 5. Hidden gems
+**109** restaurants are rated **4.0 or higher with 60 or fewer votes** (the median). New Delhi has the most (**30**), followed by Rio de Janeiro (**19**).
 
 ---
 
 ## Recommendations
 
-- **For restaurants:** [e.g. enabling table booking is associated with better ratings, particularly in the X price tier.]
-- **For the platform:** [e.g. promote the N hidden-gem restaurants to increase their discoverability.]
-- **For further analysis:** [e.g. test the effect within city and cuisine segments to control for confounders.]
+- **For restaurants:** Don't assume table booking improves ratings. Compare against restaurants in the same price range before drawing conclusions.
+- **For the platform:** Surface the 109 hidden-gem restaurants to increase their discoverability, and show vote counts alongside ratings so users can judge how reliable a score is.
+- **For analysts:** Use medians for votes, since the distribution is heavily skewed, and control for price range when comparing features.
 
 ---
 
@@ -69,51 +76,59 @@ This matters to two audiences:
 | **Source** | [Kaggle: srisyra02/zomato-market-analysis](https://www.kaggle.com/datasets/srisyra02/zomato-market-analysis) |
 | **Description** | Restaurant ratings, cuisines and pricing data from Zomato |
 | **File used** | `Zomato_Restaurant_Dataset.xlsx` (in `data/`) |
-| **Rows** | [N] |
-| **Columns** | [N] |
+| **Rows** | 9,550 (7,402 after excluding unrated restaurants) |
+| **Geography** | About 90% India, with restaurants in other countries |
 
-### Key columns used
-> Update this table to match your actual column names.
+### Key fields used
+> Update this table to match your exact column names.
 
-| Column | Description |
+| Field | Description |
 |---|---|
-| `[restaurant name]` | Name of the restaurant |
-| `[cuisines]` | Cuisine types served |
-| `[rating]` | Aggregate customer rating |
-| `[votes]` | Number of customer votes |
-| `[average cost]` | Approximate cost for two / price indicator |
-| `[table booking]` | Whether table booking is available (Yes/No) |
-| `[online delivery]` | Whether online delivery is available (Yes/No) |
+| Restaurant name | Name of the restaurant |
+| City / Country code | Location of the restaurant |
+| Cuisines | Cuisine types served |
+| Rating | Aggregate customer rating (0 = not rated) |
+| Votes | Number of customer votes |
+| Price range | Price tier from 1 (lowest) to 4 (highest) |
+| Average cost | Approximate cost, in local currency |
+| Table booking | Whether table booking is available |
+| Online delivery | Whether online delivery is available |
+| Currency | Local currency of the cost column |
 
-### Data cleaning steps
-- [e.g. Removed duplicates: N rows]
-- [e.g. Handled missing values in rating/cost: method used]
-- [e.g. Standardised Yes/No columns]
-- [e.g. Created price tier bins: Low / Medium / High]
+---
+
+## Data Cleaning
+
+- Excluded **2,148 unrated restaurants** (rating 0 means "Not rated", not a bad rating).
+- Fixed **3 corrupted city names** (São Paulo, Brasília, İstanbul) using country codes.
+- Rebuilt the currency column from country codes (e.g. Philippines was labelled "Botswana Pula").
+- Excluded zero-cost rows from cost analysis. Cost was analysed for **India only**, since costs are in 12 currencies.
+- Some restaurant names remain garbled in the source file and can't be recovered.
 
 ---
 
 ## KPIs and Metrics
 
-| KPI | Definition | Where computed |
-|---|---|---|
-| **Average rating** | Mean rating overall and by segment | SQL + Python |
-| **Average votes** | Mean (and median) votes per restaurant | SQL + Python |
-| **Rating uplift (booking / delivery)** | % difference in average rating between restaurants with and without the feature | SQL (`CASE WHEN`, `GROUP BY`) |
-| **Rating by price tier** | Average rating per price bucket | SQL + Python |
-| **Rating-cost correlation** | Spearman and Pearson coefficients between rating, votes and cost | Python |
-| **Vote outliers** | Restaurants with votes beyond the IQR upper fence | Python |
-| **Hidden gems** | High rating (≥ threshold) with low votes (≤ threshold) | SQL (`HAVING COUNT`) |
+| KPI | Definition |
+|---|---|
+| **Average rating** | Mean rating overall and by segment (booking, delivery, price range) |
+| **Median votes** | Median votes per restaurant, used instead of the mean because of skew |
+| **Rating gap (booking / delivery)** | Difference in average rating between restaurants with and without the feature, raw and within price range |
+| **Rating by price range** | Average rating for each price range (1 to 4) |
+| **Spearman correlation** | Rating vs price range, rating vs cost (India), rating vs votes |
+| **Vote outliers** | Restaurants above the upper outlier fence (424 votes) |
+| **Hidden gems** | Rating ≥ 4.0 and votes ≤ median (60) |
 
 ---
 
 ## Approach
 
-1. **Data loading and cleaning** in pandas
+1. **Data cleaning** in pandas: exclusions, text fixes, currency rebuild
 2. **Exploratory analysis:** distributions, missing values, outliers
-3. **SQL analysis in SQLite:** aggregation and segmentation queries (`AVG`, `GROUP BY`, `CASE WHEN`, `HAVING COUNT`)
-4. **Visualisation:** seaborn boxplots, violin plots, correlation heatmaps (Spearman and Pearson)
-5. **Insight synthesis:** findings and recommendations
+3. **SQL analysis in SQLite:** aggregation and segmentation queries
+4. **Controlling for confounders:** comparing booking and delivery within each price range
+5. **Visualisation:** seaborn boxplots, violin plots, correlation heatmaps
+6. **Insight synthesis:** findings and recommendations
 
 ---
 
@@ -121,7 +136,7 @@ This matters to two audiences:
 
 - **Language:** Python 3.10+
 - **Libraries:** pandas, numpy, matplotlib, seaborn, scipy, openpyxl, jupyter
-- **Database:** SQLite (built from the Excel file by the notebook)
+- **Database:** SQLite
 
 ```bash
 pip install -r requirements.txt
@@ -141,13 +156,9 @@ zomato-rating-engagement-analysis/
 ├── notebooks/
 │   └── zomato_analysis.ipynb
 ├── sql/
-│   ├── 01_booking_delivery_vs_rating.sql
-│   ├── 02_rating_by_price_tier.sql
-│   ├── 03_vote_outliers.sql
-│   └── 04_hidden_gems.sql
+│   └── *.sql
 └── images/
-    ├── rating_by_booking.png
-    └── price_vs_rating.png
+    └── *.png
 ```
 
 ---
@@ -170,22 +181,21 @@ pip install -r requirements.txt
 jupyter notebook notebooks/zomato_analysis.ipynb
 ```
 
-The notebook builds a local SQLite database (`zomato.db`) from the Excel file. The `.sql` files in `sql/` can be run against it using any SQLite client or from the notebook.
+You can also open the notebook in Google Colab and upload `data/Zomato_Restaurant_Dataset.xlsx` to run it in the browser.
 
 ---
 
 ## Limitations
 
-- The data is **observational**, so findings show association, not causation.
-- Confounders such as **city, cuisine and price tier** may influence the relationships.
-- Ratings and votes reflect **self-selected** reviewers.
-- [Add any dataset-specific limitation, e.g. snapshot date, missing values.]
+- **Correlation is not causation:** pricier restaurants may attract different reviewers.
+- **Hidden gems are candidates, not proven winners.** A 4.9 from 30 voters is a noisy estimate.
+- **The dataset is about 90% India**, so global conclusions lean on Indian restaurants.
 
 ---
 
 ## Author
 
-**Aagam**
-B.Tech (AI & ML), Ajay Kumar Garg Engineering College, Ghaziabad
+**Aagam Jain**
+
 
 [LinkedIn](#) · [GitHub](#) · [Email](#)
